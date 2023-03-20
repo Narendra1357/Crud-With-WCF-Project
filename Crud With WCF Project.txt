@@ -1,0 +1,650 @@
+//// WCF ALL METHODS 
+
+using NarendraWCFService.DbConn;
+using NarendraWCFService.Entity;
+using System;
+using System.Collections.Generic;
+using System.Data.Entity;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.ServiceModel;
+using System.Text;
+
+namespace NarendraWCFService
+{
+    // NOTE: You can use the "Rename" command on the "Refactor" menu to change the class name "MyFirstService" in code, svc and config file together.
+    // NOTE: In order to launch WCF Test Client for testing this service, please select MyFirstService.svc or MyFirstService.svc.cs at the Solution Explorer and start debugging.
+    public class MyFirstService : IMyFirstService
+    {
+        public void DoWork()
+        {
+
+        }
+
+        public List<string> GetName()
+        {
+
+            List<string> obj = new List<string>()
+            {
+                "Narendra","Raj Yadav","Abhishek","Ram"
+            };
+
+            return obj;
+        }
+        public List<Employee> GetAllData()
+        {
+            Na_WebApplicationEntities dbconn = new Na_WebApplicationEntities();
+
+            var res = dbconn.Employees.ToList();
+
+
+            return res;
+        }
+
+        public int  AddUser(int Id,string Name, string Department, string DOB, string Address, 
+            string ZipCode, Nullable<int> Salary, string PhoneNo)
+        {
+            Na_WebApplicationEntities dbconn = new Na_WebApplicationEntities();
+            Employee usrdtl = new Employee();
+            usrdtl.Id =  Id;
+            usrdtl.Name = Name;
+            usrdtl.DOB =  DOB;
+            usrdtl.Department = Department;
+            usrdtl.Address = Address;
+            usrdtl.ZipCode =  ZipCode;
+            usrdtl.Salary =  Salary;
+            usrdtl.PhoneNo = PhoneNo;
+
+            dbconn.Employees.Add(usrdtl);
+             
+            int Retval = dbconn.SaveChanges();
+            return Retval;
+        }
+        public int UpdateUser(int Id, string Name, string Department, string DOB, string Address,
+        string ZipCode, Nullable<int> Salary, string PhoneNo)
+        {
+            Na_WebApplicationEntities dbconn = new Na_WebApplicationEntities();
+            Employee usrdtl = new Employee();
+            usrdtl.Id = Id;
+            usrdtl.Name = Name;
+            usrdtl.DOB = DOB;
+            usrdtl.Department = Department;
+            usrdtl.Address = Address;
+            usrdtl.ZipCode = ZipCode;
+            usrdtl.Salary = Salary;
+            usrdtl.PhoneNo = PhoneNo;
+
+            //dbconn.Employees.Add(usrdtl);
+            dbconn.Entry(usrdtl).State = EntityState.Modified;
+            int Retval = dbconn.SaveChanges();
+            return Retval;
+        }
+
+        public EmpEntity GetDataById(int Id)
+        {
+
+            Na_WebApplicationEntities dbconn = new Na_WebApplicationEntities();
+            var editRes = dbconn.Employees.Where(m => m.Id == Id).First();
+            EmpEntity editItem = new EmpEntity();
+            editItem.Id = editRes.Id;
+            editItem.Name = editRes.Name;
+            editItem.Department = editRes.Department;
+            editItem.DOB = editRes.DOB;
+            editItem.Address = editRes.Address;
+            editItem.ZipCode = editRes.ZipCode;
+            editItem.Salary = editRes.Salary;
+            editItem.PhoneNo = editRes.PhoneNo;
+
+            return editItem;
+
+        }
+
+        public int DeleteUserById(int Id)
+        {
+            Na_WebApplicationEntities dbconn = new Na_WebApplicationEntities();
+            //TestDBEntities tstDb = new TestDBEntities();
+            Employee usrdtl = new Employee();
+            //UserDetail usrdtl = new UserDetail();
+             usrdtl.Id = Id;
+           dbconn.Entry(usrdtl).State = EntityState.Deleted;
+             int Retval = dbconn.SaveChanges();
+            return Retval;
+        }
+    }
+}
+////----------------------------
+//INTERFACE IN WCF
+
+using NarendraWCFService.DbConn;
+using NarendraWCFService.Entity;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.ServiceModel;
+using System.Text;
+
+namespace NarendraWCFService
+{
+    // NOTE: You can use the "Rename" command on the "Refactor" menu to change the interface name "IMyFirstService" in both code and config file together.
+    [ServiceContract]
+    public interface IMyFirstService
+    {
+        [OperationContract]
+        void DoWork();
+
+        [OperationContract]
+        List<string> GetName();
+
+        [OperationContract]
+        List<Employee> GetAllData();
+
+        [OperationContract]
+        int AddUser(int Id, string Name, string Department, string DOB,
+            string Address, string ZipCode, Nullable<int> Salary, string PhoneNo);
+       
+        [OperationContract]
+        EmpEntity GetDataById(int Id);
+
+        [OperationContract]
+        int DeleteUserById(int Id);
+
+        [OperationContract]
+        int UpdateUser(int Id, string Name, string Department, string DOB, string Address,
+      string ZipCode, Nullable<int> Salary, string PhoneNo);
+    }
+}
+ 
+
+////----------------------------
+//ENTITY IN WCF 
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+
+namespace NarendraWCFService.Entity
+{
+    public class EmpEntity
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Department { get; set; }
+        public string DOB { get; set; }
+        public string Address { get; set; }
+        public string ZipCode { get; set; }
+        public Nullable<int> Salary { get; set; }
+        public string PhoneNo { get; set; }
+    }
+}
+
+/////////////////////////////////////////
+//WEB CONFIG
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+
+  <appSettings>
+    <add key="aspnet:UseTaskFriendlySynchronizationContext" value="true" />
+  </appSettings>
+  <system.web>
+    <compilation debug="true" targetFramework="4.7.2" />
+    <httpRuntime targetFramework="4.7.2" />
+  </system.web>
+  <system.serviceModel>
+    <behaviors>
+      <serviceBehaviors>
+        <behavior>
+          <!-- To avoid disclosing metadata information, set the values below to false before deployment -->
+          <serviceMetadata httpGetEnabled="true" httpsGetEnabled="true" />
+          <!-- To receive exception details in faults for debugging purposes, set the value below to true.  Set to false before deployment to avoid disclosing exception information -->
+          <serviceDebug includeExceptionDetailInFaults="false" />
+        </behavior>
+      </serviceBehaviors>
+    </behaviors>
+    <protocolMapping>
+        <add binding="basicHttpsBinding" scheme="https" />
+    </protocolMapping>    
+    <serviceHostingEnvironment aspNetCompatibilityEnabled="true" multipleSiteBindingsEnabled="true" />
+  </system.serviceModel>
+  <system.webServer>
+    <modules runAllManagedModulesForAllRequests="true" />
+    <!--
+        To browse web app root directory during debugging, set the value below to true.
+        Set to false before deployment to avoid disclosing web app folder information.
+      -->
+    <directoryBrowse enabled="true" />
+  </system.webServer>
+
+<connectionStrings><add name="Stord_ProcedureEntities" connectionString="metadata=res://*/DbConn.Model1.csdl|res://*/DbConn.Model1.ssdl|res://*/DbConn.Model1.msl;provider=System.Data.SqlClient;provider connection string=&quot;data source=CHETUIWK639\SQLSERVER2019;initial catalog=Stord_Procedure;integrated security=True;MultipleActiveResultSets=True;App=EntityFramework&quot;" providerName="System.Data.EntityClient" /><add name="Na_WebApplicationEntities" connectionString="metadata=res://*/DbConn.Model1.csdl|res://*/DbConn.Model1.ssdl|res://*/DbConn.Model1.msl;provider=System.Data.SqlClient;provider connection string=&quot;data source=CHETUIWK639\SQLSERVER2019;initial catalog=Na_WebApplication;integrated security=True;MultipleActiveResultSets=True;App=EntityFramework&quot;" providerName="System.Data.EntityClient" /></connectionStrings></configuration>
+
+
+///////////////////////////////////////
+//MVC CONTROLLER
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using WCFMVCNa.Models;
+
+namespace WCFMVCNa.Controllers
+{
+    public class HomeController : Controller
+    { 
+        public ActionResult Index()
+        {
+           ServiceReference1.MyFirstServiceClient obj = new ServiceReference1.MyFirstServiceClient();
+         // ViewData["name"]= obj.GetName();
+
+          var data = obj.GetAllData();
+            List<EmpModel> res = new List<EmpModel>();
+           foreach(var item in data)
+            {
+                res.Add(new EmpModel
+                {
+                    Id=item.Id,
+                    Name=item.Name,
+                    Department=item.Department,
+                    DOB=item.DOB,
+                    Address=item.Address,
+                    ZipCode=item.ZipCode,
+                    PhoneNo=item.PhoneNo,
+                    Salary=item.Salary
+                    
+                });
+            }  
+            return View(res);
+        }
+
+        public ActionResult About()
+        {
+            ViewBag.Message = "Your application description page.";
+
+            return View();
+        }
+
+        public ActionResult Contact()
+        {
+            ViewBag.Message = "Your contact page.";
+
+            return View();
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult AddEmp()
+        {
+            return View();
+        }
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken()]
+        public ActionResult AddEmp(EmpModel objdata)
+        {
+            ServiceReference1.MyFirstServiceClient obj = new ServiceReference1.MyFirstServiceClient();
+
+            EmpModel empobj = new EmpModel();
+            empobj.Id = objdata.Id;
+            empobj.Name = objdata.Name;
+            empobj.Department = objdata.Department;
+            empobj.DOB = objdata.DOB;
+            empobj.Address = objdata.Address;
+            empobj.ZipCode = objdata.ZipCode;
+            empobj.Salary = objdata.Salary;
+            empobj.PhoneNo = objdata.PhoneNo;
+             
+           
+            if (objdata.Id == 0)
+            {
+                obj.AddUser(empobj.Id, empobj.Name, empobj.Department, empobj.DOB, empobj.Address,
+                empobj.ZipCode, empobj.Salary, empobj.PhoneNo);
+                 
+            }
+            else
+            {
+                obj.UpdateUser(empobj.Id, empobj.Name, empobj.Department, empobj.DOB, empobj.Address,
+                  empobj.ZipCode, empobj.Salary, empobj.PhoneNo);    
+                 
+            }
+
+
+            return RedirectToAction("Index");
+
+        }
+
+        public ActionResult Delete(int Id)
+        {
+            ServiceReference1.MyFirstServiceClient obj = new ServiceReference1.MyFirstServiceClient();
+              
+            obj.DeleteUserById(Id);
+             
+            return RedirectToAction("Index");
+        }
+
+        public ActionResult Edit(int Id)
+        {
+            ServiceReference1.MyFirstServiceClient obj = new ServiceReference1.MyFirstServiceClient();
+
+            var editRes = obj.GetDataById(Id);
+            EmpModel editItem = new EmpModel();
+            editItem.Id = editRes.Id;
+            editItem.Name = editRes.Name;
+            editItem.Department = editRes.Department;
+            editItem.DOB = editRes.DOB;
+            editItem.Address = editRes.Address;
+            editItem.ZipCode = editRes.ZipCode;
+            editItem.Salary = editRes.Salary;
+            editItem.PhoneNo = editRes.PhoneNo;
+              return View("AddEmp",editItem);
+            
+        }
+    }
+}
+
+//////////////////////////////// MVC MODEL
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+
+namespace WCFMVCNa.Models
+{
+    public class EmpModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Department { get; set; }
+        public string DOB { get; set; }
+        public string Address { get; set; }
+        public string ZipCode { get; set; }
+        public int? Salary { get; set; }
+        public string PhoneNo { get; set; }
+    }
+}
+/////////////////////////// LAYOUT
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - My ASP.NET Application</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body style="background-color:#bffadb">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                @Html.ActionLink("Application name", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li>@Html.ActionLink("Home", "Index", "Home")</li>
+                    <li>@Html.ActionLink("About", "About", "Home")</li>
+                    <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
+                    <li>@Html.ActionLink("Form", "AddEmp", "Home")</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
+        </footer>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+</body>
+</html>
+
+
+//////////////////////////////// INDEX PAGE
+@model List<WCFMVCNa.Models.EmpModel>
+@{
+    ViewBag.Title = "Home Page";
+}
+<table class=" table table-bordered table-hover table-responsive table-dark">
+    <tr style="background-color:#0094ff">
+        <th>Id</th>
+        <th>Name</th>
+        <th>DOB</th>
+        <th>mobile</th>
+        <th>Address</th>
+        <th>ZipCode</th>
+        <th>Department</th>
+        <th>Salary</th>
+    </tr>
+    
+    @*@foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.Id</td>
+            <td>@item.Name</td>
+            <td>@item.DOB</td>
+            <td>@item.PhoneNo</td>
+            <td>@item.Address</td>
+             
+            <td>@item.ZipCode</td>
+            <td>@item.Department</td>
+            <td>@item.Salary</td>
+             
+            </tr>
+    }*@
+            @for (var i = 0; i < Model.Count(); i++)
+
+                {
+<tr>
+    <td>@Model[i].Id</td>
+    <td>@Model[i].Name</td>
+    <td>@Model[i].DOB</td>
+    <td>@Model[i].PhoneNo</td>
+    <td>@Model[i].Address</td>
+    <td>@Model[i].ZipCode</td>
+    <td>@Model[i].Department</td>
+    <td>@Model[i].Salary</td>
+    <td><a class="btn btn-primary" href="@Url.Action("Edit","Home",new {@Model[i].Id })">Edit</a></td>
+    <td><a class="btn btn-danger" href="@Url.Action("Delete","Home",new {@Model[i].Id })">Delete</a></td>
+</tr>
+                }
+ </table>
+
+//////////////////////////////// ADD DETAILS PAGE
+
+@model WCFMVCNa.Models.EmpModel
+@{
+    ViewBag.Title = "AddEmp";
+}
+
+<h2>AddEmp</h2>
+  
+<style>
+    .error {
+        color: red;
+    }
+
+    input[type="text"] {
+        color: black;
+    }
+
+    .split {
+        height: 100%;
+        width: 50%;
+        position: absolute;
+        display: inherit;
+    }
+
+    .left {
+        left: 0px;
+        background-color: #abeae6;
+    }
+
+    .right {
+        right: 0;
+        background-color: #c4eadd;
+    }
+
+    .top {
+        margin: 10px;
+        border: initial;
+        display: normal;
+        background-color: aquamarine;
+    }
+
+    .img {
+        position: absolute;
+        width: 450px;
+        height: 460px;
+        padding: 90px;
+        margin: 200px;
+    }
+
+    .form {
+        font: 100%;
+        padding: 20px;
+    }
+
+    .p {
+        position: center;
+        margin: 10%;
+        padding: 20%;
+    }
+
+    .star {
+        color: red;
+    }
+
+    .pr {
+        padding-bottom: 3em;
+        text-align: center;
+    }
+</style>
+<body style="background-color:#559fee">
+
+    @using (Html.BeginForm("AddEmp", "Home", FormMethod.Post))
+    {
+        @Html.HiddenFor(m => m.Id);
+        @Html.AntiForgeryToken();
+
+        <canter>
+            <div class="form">
+                <div>
+                    <marquee><h2 style="color:blue;">For registration please Fill the below form...</h2></marquee>
+                </div>
+                <div class="split left">
+                    <div class="p">
+                        <div class="col-12">
+                            <label class="star">*</label><label> Enter your full Name</label>
+                            @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.Name, "", new { @class = "error" })
+                        </div>
+                        <div class="col-6">
+                            <label class="star">*</label><label>Enter your Department</label>
+                            @Html.TextBoxFor(m => m.Department, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.Department, "", new { @class = "error" })
+                        </div>
+                        <div class="col-6">
+                            <label class="star">*</label><label>Enter your Dob</label>
+                            @Html.TextBoxFor(m => m.DOB, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.DOB, "", new { @class = "error" })
+                        </div>
+                        <div class="col-12">
+                            <label class="star">*</label><label>Enter your full Address</label>
+                            @Html.TextAreaFor(m => m.Address, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.Address, "", new { @class = "error" })
+                        </div>
+                        <div class="form-group">
+                            <label class="star">*</label><label>Enter your ZipCode</label>
+                            @Html.TextBoxFor(m => m.ZipCode, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.ZipCode, "", new { @class = "error" })
+                        </div>
+                        <div class="form-group">
+                            <label class="star">*</label><label>Enter your Salary</label>
+                            @Html.TextBoxFor(m => m.Salary, new { @class = "form-control input" })
+                            @Html.ValidationMessageFor(m => m.Salary, "", new { @class = "error" })
+                        </div>
+                        <div class="form-group">
+                            <label class="star">*</label><label>Enter your PhoneNo</label>
+                            @Html.TextBoxFor(m => m.PhoneNo, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.PhoneNo, "", new { @class = "error" })
+                        </div>
+
+                        <button class="btn-primary " type="submit">Submit</button>
+                        <button class="btn-group-sm " type="reset">Reset</button>
+                    </div>
+                </div>
+                <div class="split right">
+
+                    <img src="~/Image/rrrrr.jpg" class="img   " alt="..." />
+                    <p class="text-center">Upload your resent image. Image size should be (50kb - 150kb)....</p>
+
+                </div>
+            </div>
+        </canter>
+    }
+</body>
+<div> 
+</div>
+--------------------------------------------------
+//////////////////
+//DATABASE
+ 
+ use Na_WebApplication;
+
+create Table Employee(Id int NOT NULL IDENTITY(100,1) PRIMARY KEY,
+Name varchar(55),Department varchar(55),DOB varchar(15),
+Address varchar(55),ZipCode varchar(55),Salary int);
+
+select*from Employee;
+select* from INFORMATION_SCHEMA.TABLES
+delete from employee where id=100; 
+insert into employee values( 'Rohan','MCA','2/09/2003','Ghazipur','275206',22451,'9897869'),
+( 'Mohan','B.Tech','2/7/2001','Noida','27545',14655),
+( 'Syam','MCA','23/6/2000','Delhi','105001',18150);
+select * from employee
+create table EmpLogin(Id int not null primary Key, Name varchar(50),Email varchar(50),
+Password varchar(55));
+drop table empLogin
+select * from EmpLogin
+
+alter table employee add PhoneNo varchar(55);
+
+insert into EmpLogin values(54,'narendra','narendra@gmail.com','na1234556')
+
+create table Empp(Id int not null identity(101,2) primary Key, Name varchar(50),Email varchar(50))
+insert into empp( name,email) values(  'endra','endra@gmail.com');
+
+delete from employee where id=118;
+
+set identity_insert empp on; 
+
+set identity_insert empp off;
+select*from empp;
+
+select*from INFORMATION_SCHEMA.TABLES
+
+select*from Employee ;
+sp_help employee
+ 
+-------------------------------------------------
+ 
+
+
+
+
+
+
+
+
